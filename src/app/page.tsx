@@ -1,88 +1,93 @@
-// export default function Home() {
-//   return (
-//     <main className='flex flex-col items-center justify-center h-screen p-24'>
-//       <div className='text-center '>
-//         <h1 className='uppercase text-white tracking-[1.5rem] font-medium py-8 text-2xl'>
-//           Our Cinematic
-//         </h1>
-//         <div className='flex items-center justify-center space-x-4 inset-0'>
-//           <button className='px-8 py-6 mx-4 bg-transparent border-white text-xs text-white uppercase transition duration-200 hover:bg-white hover:text-black'>
-//             Our Work
-//           </button>
-//           <button className='px-8 py-6 mx-4 bg-transparent border-white text-xs text-white uppercase transition duration-200 hover:bg-white hover:text-black'>
-//             Our Story
-//           </button>
-//         </div>
-//       </div>
-//       <video
-//         src='/video.mp4'
-//         autoPlay
-//         muted
-//         loop
-//         className='absolute h-full w-full object-cover -z-10'
-//       />
-//     </main>
-//   );
-// }
-
 "use client";
 import { useEffect, useState } from "react";
 import Collection from "../../components/Collection";
 
 type CollectionData = {
-  category: number;
+  categoru: number;
   name: string;
   photos: string[];
 };
 
+type Category = {
+  name: string;
+};
+
 export default function Home() {
-  const [colections, setColections] = useState<CollectionData[]>([]);
+  const [colection, setColection] = useState<CollectionData[]>([]);
+  const [searchValues, setSearchValues] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<number>(0);
+
+  const myCategory: Category[] = [
+    { name: "All" },
+    { name: "Sea" },
+    { name: "Mountains" },
+    { name: "Architectory" },
+    { name: "Cities" },
+  ];
+
   useEffect(() => {
     const fatchCollection = async () => {
       try {
-        const response = await fetch(
-          "https://6734d27e5995834c8a9100ae.mockapi.io/photos"
-        );
+        const url = `https://6734d25c5995834c8a90ff8e.mockapi.io/photos${
+          categoryId ? `?category=${categoryId}` : ""
+        }`;
+        const response = await fetch(url);
 
         const data: CollectionData[] = await response.json();
-        setColections(data);
+        setColection(data);
         console.log(data);
       } catch (error) {
         console.error("error with fetching", error);
       }
     };
     fatchCollection();
-  }, []);
-  return (
-    <div>
-      <div>
-        <h1>my collection</h1>
-        <ul>
-          <li>Home</li>
-          <li>About</li>
-          <li>Test</li>
-          <li>Test2</li>
-        </ul>
-        <input type='text' placeholder='space' />
+  }, [categoryId]);
 
-        <div className='grid grid-cols-3 gap-[30px] mt-[40px] sm:grid-cols-2 xs:grid-cols-1 '>
-          {/* <Collection
-            name='Travel Around World'
-            photos={[
-              "https://images.unsplash.com/photo-1613746546375-fc892a3d44a3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHRyYXZlbGxpbmd8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
-              "https://images.unsplash.com/photo-1613401688321-f9464c7f16e4?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mjd8fHRyYXZlbGxpbmd8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
-              "https://images.unsplash.com/photo-1607366631022-285d7b3f9e28?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MzJ8fHRyYXZlbGxpbmd8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
-              "https://images.unsplash.com/photo-1607623814075-7d87d62cfd35?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mzh8fHRyYXZlbGxpbmd8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60",
-            ]}
-          /> */}
-          {colections.map((colection) => (
-            <Collection
-              key={colection.name}
-              name={colection.name}
-              photos={colection.photos}
-            />
+  const filterCollections = colection.filter((collection) =>
+    collection.name.toLowerCase().includes(searchValues.toLowerCase())
+  );
+
+  return (
+    <div className='p-[50px] max-w-[1200px] w-full m-auto'>
+      <h1 className='font-serif'>My Photo Collection</h1>
+      <div className='flex items-center flex-wrap mt-[40px]'>
+        <ul className='flex list-none p-0'>
+          {myCategory.map((category, index) => (
+            <li
+              key={index}
+              onClick={() => setCategoryId(index)}
+              className={`inline-block py-[12px] px-[18px] rounded-[10px] mr-[10px] cursor-pointer font-semibold text-[18px] border-[1px] border-transparent hover:border-black active:bg-black active:text-white transition-all duration-150 ease-in-out ${
+                categoryId === index ? "bg-black text-white" : "bg-white"
+              }`}>
+              {category.name}
+            </li>
           ))}
-        </div>
+        </ul>
+        <input
+          className='mt-[20px] w-[250px] h-[50px] p-[0_15px] text-[16px] rounded-[10px] border-[1px] border-[#00000033] focus:border-[#00000066] outline-none transition-all duration-150 ease-in-out'
+          placeholder='Search With Name'
+          value={searchValues}
+          onChange={(e) => setSearchValues(e.target.value)}
+        />
+      </div>
+      <div className='grid grid-cols-1 gap-[30px] mt-[40px] sm:grid-cols-3 xs:grid-cols-2'>
+        {/* <Collection
+          name="travel around world"
+          photos={[
+            "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTh8fHNlYSUyMGFlc3RoZXRpY3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
+            "https://images.unsplash.com/photo-1621335223658-0ebd89004d51?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8c2VhJTIwYWVzdGhldGljfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60",
+            "https://images.unsplash.com/photo-1501436513145-30f24e19fcc8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTF8fHNlYSUyMGFlc3RoZXRpY3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60",
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8c2VhJTIwYWVzdGhldGljfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60",
+          ]}
+        />{" "} */}
+
+        {filterCollections.map((colection) => (
+          <Collection
+            key={colection.name}
+            name={colection.name}
+            photos={colection.photos}
+          />
+        ))}
       </div>
     </div>
   );
